@@ -71,7 +71,7 @@ updatePipes step world =
     updatePipe (x, y) =
       (x - (world ^. horizontalSpeed) * step, y)
   in
-    world & pipeLocations %~ Pipes . fmap updatePipe . unPipes
+    world & pipeLocations . pPipes %~ fmap updatePipe
 
 tidyAndSpawnPipes
    :: World

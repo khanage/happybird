@@ -5,12 +5,24 @@ import           Control.Bird
 import           Control.Lens
 import           Data.Images    (backgroundImage, groundImage, lowerPipeImage,
                                  upperPipeImage)
+import           Data.Pipes
 import           Data.World
 import           Graphics.Gloss (Picture, pictures, scale, translate)
 import           Linear.V2
 import           Prelude
-import Data.Pipes
-  
+
+-- Just sticking this here as it's the only thing that gets exported
+drawAllElements
+  :: World
+  -> Picture
+drawAllElements =
+  pictures . renderAll
+      [ drawBackground
+      , drawGround
+      , drawPipes
+      , drawBird
+      ]
+
 newtype ElementRender = ElementRender { unElementRender :: World -> Picture }
 
 drawBackground
@@ -26,7 +38,7 @@ drawGround =
 drawPipes
   :: ElementRender
 drawPipes = ElementRender $ \world ->
-  pictures . concat $ uncurry (pipes world) <$> world ^. pipeLocations . to unPipes
+  pictures . concat $ uncurry (pipes world) <$> world ^. pipeLocations . pPipes
   where
      pipes world x y =
         [ draw lowerPipeImage x y world
@@ -56,17 +68,10 @@ renderAll
 renderAll renderers world =
   fmap (($ world) . unElementRender) renderers
 
-drawAllElements
-  :: World
+renderAt
+  :: Picture
+  -> V2 Float
   -> Picture
-drawAllElements =
-  pictures . renderAll
-      [ drawBackground
-      , drawGround
-      , drawPipes
-      , drawBird
-      ]
-
 renderAt p (V2 x y) = translate x y p
 
 scalingFor
